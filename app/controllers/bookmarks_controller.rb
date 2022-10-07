@@ -1,10 +1,12 @@
 class BookmarksController < ApplicationController
+  before_action :set_list, only: [:new, :create]
+  before_action :set_bookmark, only: :destroy
+
   def new
-    @list = List.find(params[:list_id])
     @bookmark = Bookmark.new
   end
+
   def create
-    @list = List.find(params[:list_id])
     @bookmark = Bookmark.new(bookmark_params)
     @bookmark.list = @list
     if @bookmark.save
@@ -13,17 +15,23 @@ class BookmarksController < ApplicationController
       render :new
     end
   end
+
   def destroy
-    # @list = List.find(params[:list_id])
-    @bookmark = Bookmark.find(params[:id])
-    if @bookmark.destroy
-      redirect_to list_path(@bookmark.list)
-    else
-      render list_path(@bookmark.list), notice: "Something went wrong!"
-    end
+    @bookmark.destroy
+    redirect_to list_path(@bookmark.list), status: :see_other
   end
+
   private
+
   def bookmark_params
     params.require(:bookmark).permit(:comment, :movie_id)
+  end
+
+  def set_bookmark
+    @bookmark = Bookmark.find(params[:id])
+  end
+
+  def set_list
+    @list = List.find(params[:list_id])
   end
 end
